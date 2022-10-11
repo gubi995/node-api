@@ -25,6 +25,22 @@ class UserService {
     return user;
   }
 
+  async getAutoSuggestUsers(loginSubstring: string, limit: number) {
+    const users = await UserModel.getAll();
+
+    const suggestedUsers = users.filter(({ login }) =>
+      login.includes(loginSubstring)
+    );
+
+    const limitedSuggestion = suggestedUsers.slice(0, limit);
+
+    limitedSuggestion.sort((userA, userB) =>
+      userA.login.localeCompare(userB.login)
+    );
+
+    return limitedSuggestion;
+  }
+
   async create(user: Omit<User, 'id'>) {
     return await UserModel.create(user);
   }

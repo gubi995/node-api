@@ -24,13 +24,25 @@ export const getUserById: Handler = async (req, res, next) => {
   }
 };
 
+export const getAutoSuggestUsers: Handler = async (req, res, next) => {
+  try {
+    const login = String(req.query.login);
+    const limit = Number(req.query.limit);
+
+    const users = await UserService.getAutoSuggestUsers(login, limit);
+
+    return res.status(HttpStatus.OK).json({ users });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const createUser: Handler = async (req, res, next) => {
   try {
     const user = await UserService.create(req.body);
 
     return res.status(HttpStatus.CREATED).json({ user });
   } catch (error) {
-    console.log({ error });
     next(error);
   }
 };

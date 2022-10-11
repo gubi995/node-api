@@ -1,4 +1,6 @@
-import { ErrorRequestHandler, Request, Response } from 'express';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { ErrorRequestHandler, NextFunction, Request, Response } from 'express';
+import { ValidationError } from 'joi';
 
 import { HttpStatus } from '../types/http-status';
 
@@ -18,23 +20,39 @@ export class AppError extends Error {
 }
 
 export const errorMiddleware: ErrorRequestHandler = (
-  error: AppError,
+  error: any,
   req: Request,
-  res: Response
+  res: Response,
+  _next: NextFunction
 ) => {
-  errorHandler.handleError(error);
+  const appError = errorHandler.parse(error);
 
-  const status = error.statusCode ?? HttpStatus.INTERNAL_SERVER_ERROR;
+  errorHandler.handleError(appError);
 
-  res.status(status).json({
-    error: error.message,
-    status,
+  res.status(appError.statusCode).json({
+    error: appError.message,
+    status: appError.statusCode,
     ...(process.env.NODE_ENV !== 'production' ? { stack: error.stack } : {}),
   });
 };
 
 export class ErrorHandler {
-  handleError(error: Error) {
+  parse(error: any) {
+    if (error?.error instanceof ValidationError) {
+      const [detail] = error.error.details;
+      console.log({ detail });
+
+      return new AppError(detail.message, HttpStatus.BAD_REQUEST);
+    }
+
+    if (error instanceof AppError) {
+      return error;
+    }
+
+    return new AppError(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+  }
+
+  handleError(error: AppError) {
     logger.error(error.message);
     // sendEmail if it is critical
   }

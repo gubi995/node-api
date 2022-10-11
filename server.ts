@@ -19,9 +19,11 @@ process.on('unhandledRejection', (reason: string) => {
 });
 
 process.on('uncaughtException', (error) => {
-  errorHandler.handleError(error);
+  const appError = errorHandler.parse(error);
 
-  if (!errorHandler.isTrustedError(error)) {
+  errorHandler.handleError(appError);
+
+  if (!errorHandler.isTrustedError(appError)) {
     server.close(() => {
       process.exit(1);
     });

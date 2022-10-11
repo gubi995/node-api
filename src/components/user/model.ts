@@ -57,7 +57,7 @@ class UserModel {
 
     if (userIndex === -1) return false;
 
-    this.#users.splice(userIndex, 1);
+    this.#users[userIndex].isDeleted = true;
 
     return true;
   }

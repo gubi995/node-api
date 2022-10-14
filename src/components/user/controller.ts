@@ -1,10 +1,22 @@
-import { Handler } from 'express';
+import { Request, Response, NextFunction } from 'express';
+import { ValidatedRequest } from 'express-joi-validation';
 
 import { HttpStatus } from '../../types/http-status';
 
 import UserService from './service';
+import {
+  CreateUserSchema,
+  DeleteUserSchema,
+  GetAutoSuggestUserSchema,
+  GetByIdRequestSchema,
+  UpdateUserSchema,
+} from './types';
 
-export const getUsers: Handler = async (req, res, next) => {
+export const getUsers = async (
+  _req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const users = await UserService.getAll();
 
@@ -14,7 +26,11 @@ export const getUsers: Handler = async (req, res, next) => {
   }
 };
 
-export const getUserById: Handler = async (req, res, next) => {
+export const getUserById = async (
+  req: ValidatedRequest<GetByIdRequestSchema>,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const user = await UserService.getById(req.params.id);
 
@@ -24,12 +40,16 @@ export const getUserById: Handler = async (req, res, next) => {
   }
 };
 
-export const getAutoSuggestUsers: Handler = async (req, res, next) => {
+export const getAutoSuggestUsers = async (
+  req: ValidatedRequest<GetAutoSuggestUserSchema>,
+  res: Response,
+  next: NextFunction
+) => {
   try {
-    const login = String(req.query.login);
-    const limit = Number(req.query.limit);
-
-    const users = await UserService.getAutoSuggestUsers(login, limit);
+    const users = await UserService.getAutoSuggestUsers(
+      req.query.login,
+      req.query.limit
+    );
 
     return res.status(HttpStatus.OK).json({ users });
   } catch (error) {
@@ -37,7 +57,11 @@ export const getAutoSuggestUsers: Handler = async (req, res, next) => {
   }
 };
 
-export const createUser: Handler = async (req, res, next) => {
+export const createUser = async (
+  req: ValidatedRequest<CreateUserSchema>,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const user = await UserService.create(req.body);
 
@@ -47,7 +71,11 @@ export const createUser: Handler = async (req, res, next) => {
   }
 };
 
-export const updateUser: Handler = async (req, res, next) => {
+export const updateUser = async (
+  req: ValidatedRequest<UpdateUserSchema>,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const user = await UserService.update(req.params.id, req.body);
 
@@ -57,7 +85,11 @@ export const updateUser: Handler = async (req, res, next) => {
   }
 };
 
-export const deleteUser: Handler = async (req, res, next) => {
+export const deleteUser = async (
+  req: ValidatedRequest<DeleteUserSchema>,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     await UserService.delete(req.params.id);
 

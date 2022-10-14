@@ -3,8 +3,8 @@
 import http from 'http';
 
 import app from './src/app';
-import { errorHandler } from './src/utils/error';
-import logger from './src/utils/logger';
+import { errorHandler } from './src/shared/error';
+import logger from './src/shared/logger';
 
 const PORT = 3000;
 
@@ -24,6 +24,8 @@ process.on('uncaughtException', (error) => {
   errorHandler.handleError(appError);
 
   if (!errorHandler.isTrustedError(appError)) {
+    logger.error(appError);
+
     server.close(() => {
       process.exit(1);
     });

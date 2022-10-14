@@ -53,7 +53,13 @@ export class ErrorHandler {
   }
 
   handleError(error: AppError) {
-    logger.error(error.message);
+    if (error.isOperational) {
+      logger.warn(error.message);
+    }
+    {
+      logger.error(error);
+    }
+
     // sendEmail if it is critical
   }
 

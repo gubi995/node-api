@@ -19,32 +19,31 @@ log4js.configure({
     default: {
       appenders: ['out', 'app', 'just-error'],
       level: 'debug',
+      enableCallStack: true,
     },
   },
   //   pm2: true, Loggers probably won't work according the doc. Let's look into it later
 });
 
+type Log = string | Error;
+
 class Logger {
   #logger = log4js.getLogger();
 
-  debug(message: string) {
+  debug(message: Log) {
     this.#logger.debug(message);
   }
 
-  info(message: string) {
+  info(message: Log) {
     this.#logger.info(message);
   }
 
-  warn(message: string) {
+  warn(message: Log) {
     this.#logger.warn(message);
   }
 
-  error(message: string) {
+  error(message: Log) {
     this.#logger.error(message);
-  }
-
-  fatal(message: string) {
-    this.#logger.fatal(message);
   }
 }
 

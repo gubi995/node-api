@@ -1,8 +1,8 @@
 import express from 'express';
 
 import user from './components/user';
-import { errorMiddleware } from './utils/error';
-import { loggerMiddleware } from './utils/logger';
+import { errorMiddleware } from './shared/error';
+import { loggerMiddleware } from './shared/logger';
 
 const app = express();
 

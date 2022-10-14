@@ -1,5 +1,5 @@
 import { HttpStatus } from '../../types/http-status';
-import { AppError } from '../../utils/error';
+import { AppError } from '../../shared/error';
 import UserModel from './model';
 import { User } from './types';
 

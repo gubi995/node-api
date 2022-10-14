@@ -1,6 +1,6 @@
 import * as Joi from 'joi';
 
-import { validator } from '../../utils/validator';
+import { validator } from '../../shared/validator';
 
 const passwordValidation = Joi.string()
   .required()

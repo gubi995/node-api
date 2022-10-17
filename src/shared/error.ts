@@ -55,8 +55,7 @@ export class ErrorHandler {
   handleError(error: AppError) {
     if (error.isOperational) {
       logger.warn(error.message);
-    }
-    {
+    } else {
       logger.error(error);
     }
 

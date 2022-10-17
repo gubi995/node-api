@@ -31,7 +31,7 @@ const userIdSchema = Joi.object({
 });
 
 export const updateValidation = [
-  validator.params(idValidation),
+  validator.params(userIdSchema),
   validator.body(userSchema),
 ];
 

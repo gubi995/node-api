@@ -9,7 +9,7 @@ log4js.configure({
       type: 'file',
       filename: path.join('logs', 'error.log'),
     },
-    'just-error': {
+    onlyError: {
       type: 'logLevelFilter',
       appender: 'error',
       level: 'error',
@@ -17,7 +17,7 @@ log4js.configure({
   },
   categories: {
     default: {
-      appenders: ['out', 'app', 'just-error'],
+      appenders: ['out', 'app', 'onlyError'],
       level: 'debug',
       enableCallStack: true,
     },

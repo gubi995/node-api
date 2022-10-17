@@ -14,11 +14,11 @@ class UserService {
   }
 
   async getAll() {
-    return await UserModel.getAll();
+    return await UserModel.findAll();
   }
 
   async getById(id: User['id']) {
-    const user = await UserModel.getById(id);
+    const user = await UserModel.findByPk(id);
 
     this.#throwIfUserNotFound(Boolean(user), id);
 
@@ -26,7 +26,7 @@ class UserService {
   }
 
   async getAutoSuggestUsers(loginSubstring: string, limit: number) {
-    const users = await UserModel.getAll();
+    const users = await UserModel.findAll();
 
     const suggestedUsers = users.filter(({ login }) =>
       login.includes(loginSubstring)
@@ -46,7 +46,10 @@ class UserService {
   }
 
   async update(id: string, user: Partial<User>) {
-    const updateUser = await UserModel.update({ ...user, id });
+    const [, updateUser] = await UserModel.update(user, {
+      where: { id },
+      returning: true,
+    });
 
     this.#throwIfUserNotFound(Boolean(updateUser), id);
 
@@ -54,9 +57,9 @@ class UserService {
   }
 
   async delete(id: User['id']) {
-    const success = await UserModel.delete(id);
+    const success = await UserModel.destroy({ where: { id } });
 
-    this.#throwIfUserNotFound(success, id);
+    this.#throwIfUserNotFound(Boolean(success), id);
   }
 }
 

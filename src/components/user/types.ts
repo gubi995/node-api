@@ -6,6 +6,8 @@ export type User = {
   password: string;
   age: number;
   isDeleted: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 };
 
 export interface GetByIdRequestSchema extends ValidatedRequestSchema {

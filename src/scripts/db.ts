@@ -4,8 +4,10 @@ import { faker } from '@faker-js/faker';
 
 import logger from '../shared/logger';
 import db from '../shared/db';
-import { User } from '../components/user';
-import UserModel from '../components/user/model';
+import user, { User } from '../components/user';
+import { UserModel } from '../components/user/model';
+import { GroupModel } from '../components/group/model';
+import { UserGroupModel } from '../components/user-group/model';
 
 faker.seed(51536);
 
@@ -23,15 +25,34 @@ const run = async () => {
 
     // Create the DB table.
     await UserModel.sync({ force: true });
+    await GroupModel.sync({ force: true });
+    await UserGroupModel.sync({ force: true });
 
-    const users = Array(10).fill('').map(createUser);
-
-    // Insert user data.
-    await UserModel.bulkCreate(users);
-  } catch (error) {
-    logger.error(
-      `Error during script execution. Error: ${JSON.stringify(Error)}`
+    // Insert data.
+    const readonlyGroup = await GroupModel.create({
+      id: faker.datatype.uuid(),
+      name: 'Read only',
+      permissions: ['READ'],
+    });
+    const adminGroup = await GroupModel.create({
+      id: faker.datatype.uuid(),
+      name: 'Admin',
+      permissions: ['READ', 'WRITE', 'DELETE'],
+    });
+    const users = await UserModel.bulkCreate(
+      Array(10).fill('').map(createUser)
     );
+
+    await Promise.all([
+      readonlyGroup.$add('User', users[0]),
+      readonlyGroup.$add('User', users[1]),
+      readonlyGroup.$add('User', users[2]),
+      readonlyGroup.$add('User', users[3]),
+      adminGroup.$add('User', users[4]),
+      adminGroup.$add('User', users[5]),
+    ]);
+  } catch (error) {
+    logger.error('Error during script execution.', error as Error);
   } finally {
     await db.close();
 

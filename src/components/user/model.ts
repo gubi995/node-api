@@ -1,46 +1,45 @@
 import {
-  DataTypes,
+  Table,
+  Column,
   Model,
-  InferAttributes,
-  InferCreationAttributes,
-  CreationOptional,
-} from 'sequelize';
+  DataType,
+  PrimaryKey,
+  Default,
+  AllowNull,
+  Validate,
+  BelongsToMany,
+} from 'sequelize-typescript';
 
-import db from '../../shared/db';
+import { GroupModel } from '../group/model';
+import { UserGroupModel } from '../user-group/model';
+import { User } from './type';
 
-export default class UserModel extends Model<
-  InferAttributes<UserModel>,
-  InferCreationAttributes<UserModel>
-> {
-  declare id: CreationOptional<string>;
-  declare login: string;
-  declare password: string;
-  declare age: number;
-  declare isDeleted: boolean;
+@Table({ timestamps: true, tableName: 'Users' })
+export class UserModel extends Model {
+  @PrimaryKey
+  @Default(DataType.UUIDV4)
+  @Column(DataType.UUID)
+  id!: User['id'];
+
+  @AllowNull(false)
+  @Column(DataType.STRING)
+  login!: User['login'];
+
+  @AllowNull(false)
+  @Column(DataType.STRING)
+  password!: User['password'];
+
+  @AllowNull(false)
+  @Validate({ min: 4, max: 130 })
+  @Column(DataType.INTEGER)
+  age!: User['age'];
+
+  @AllowNull(false)
+  @Validate({ min: 4, max: 130 })
+  @Default(false)
+  @Column(DataType.BOOLEAN)
+  isDeleted!: User['isDeleted'];
+
+  @BelongsToMany(() => GroupModel, () => UserGroupModel)
+  groups!: Array<GroupModel & { UserGroup: UserGroupModel }>;
 }
-
-UserModel.init(
-  {
-    id: {
-      type: DataTypes.UUID,
-      primaryKey: true,
-      defaultValue: DataTypes.UUIDV4,
-    },
-    login: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    password: { type: DataTypes.STRING, allowNull: false },
-    age: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      validate: { min: 4, max: 130 },
-    },
-    isDeleted: {
-      type: DataTypes.BOOLEAN,
-      allowNull: false,
-      defaultValue: false,
-    },
-  },
-  { sequelize: db, timestamps: true, tableName: 'users' }
-);

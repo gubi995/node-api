@@ -1,7 +1,7 @@
 import { HttpStatus } from '../../types/http-status';
 import { AppError } from '../../shared/error';
-import UserModel from './model';
-import { User } from './types';
+import { UserModel } from './model';
+import { User } from './type';
 
 class UserService {
   #throwIfUserNotFound(userExists: boolean, userId: string) {
@@ -25,7 +25,7 @@ class UserService {
     return user;
   }
 
-  async getAutoSuggestUsers(loginSubstring: string, limit: number) {
+  async getAutoSuggestions(loginSubstring: string, limit: number) {
     const users = await UserModel.findAll();
 
     const suggestedUsers = users.filter(({ login }) =>
@@ -57,7 +57,10 @@ class UserService {
   }
 
   async delete(id: User['id']) {
-    const success = await UserModel.destroy({ where: { id } });
+    const [success] = await UserModel.update(
+      { isDeleted: true },
+      { where: { id } }
+    );
 
     this.#throwIfUserNotFound(Boolean(success), id);
   }

@@ -30,20 +30,20 @@ type Log = string | Error;
 class Logger {
   #logger = log4js.getLogger();
 
-  debug(message: Log) {
-    this.#logger.debug(message);
+  debug(message: Log, ...details: Log[]) {
+    this.#logger.debug(message, ...details);
   }
 
-  info(message: Log) {
-    this.#logger.info(message);
+  info(message: Log, ...details: Log[]) {
+    this.#logger.info(message, ...details);
   }
 
-  warn(message: Log) {
-    this.#logger.warn(message);
+  warn(message: Log, ...details: Log[]) {
+    this.#logger.warn(message, ...details);
   }
 
-  error(message: Log) {
-    this.#logger.error(message);
+  error(message: Log, ...details: Log[]) {
+    this.#logger.error(message, ...details);
   }
 }
 

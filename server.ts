@@ -18,11 +18,7 @@ const run = async () => {
 
     initProcessHandlers(server);
   } catch (error) {
-    logger.error(
-      `An unexpected error happened during startup. Error: ${JSON.stringify(
-        error
-      )}`
-    );
+    logger.error('An unexpected error happened during startup', error as Error);
   }
 };
 

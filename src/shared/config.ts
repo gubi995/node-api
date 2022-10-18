@@ -3,7 +3,12 @@ import convict from 'convict';
 interface ConfigSchema {
   env: string;
   port: number;
-  db: string;
+  db: {
+    name: string;
+    dialect: string;
+    username: string;
+    password: string;
+  };
 }
 
 const config = convict<ConfigSchema>({
@@ -21,9 +26,26 @@ const config = convict<ConfigSchema>({
     arg: 'port',
   },
   db: {
-    doc: 'Connection URL to the db',
-    format: '*',
-    default: 'postgres://username:password@url:port/dbName ',
+    name: {
+      doc: 'Name of the DB',
+      format: '*',
+      default: 'dbname',
+    },
+    dialect: {
+      doc: 'Dialect of the DB (e.g. sqlite, postgres, mysql)',
+      format: '*',
+      default: 'postgres',
+    },
+    username: {
+      doc: 'Username credential',
+      format: '*',
+      default: 'username',
+    },
+    password: {
+      doc: 'Password credential',
+      format: '*',
+      default: 'password',
+    },
   },
 });
 
@@ -32,7 +54,5 @@ const env = config.get('env');
 config.loadFile(`./config/${env}.json`);
 
 config.validate({ allowed: 'strict' });
-
-console.log({ config });
 
 export default config;

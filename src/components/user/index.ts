@@ -1,3 +1,3 @@
 export { default } from './api';
 
-export type { User } from './types';
+export type { User } from './type';

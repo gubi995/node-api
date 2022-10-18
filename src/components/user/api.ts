@@ -7,26 +7,19 @@ import {
   deleteValidation,
   getAutoSuggestUsersValidation,
 } from './validation';
-import {
-  getUserById,
-  getUsers,
-  getAutoSuggestUsers,
-  createUser,
-  updateUser,
-  deleteUser,
-} from './controller';
+import userController from './controller';
 
 const router = Router();
 
 router.get(
   '/auto-suggestion',
   ...getAutoSuggestUsersValidation,
-  getAutoSuggestUsers
+  userController.getAutoSuggestions
 );
-router.get('/:id', ...getByIdValidation, getUserById);
-router.get('', getUsers);
-router.post('', ...createValidation, createUser);
-router.put('/:id', ...updateValidation, updateUser);
-router.delete('/:id', ...deleteValidation, deleteUser);
+router.get('/:id', ...getByIdValidation, userController.getById);
+router.get('', userController.getAll);
+router.post('', ...createValidation, userController.create);
+router.put('/:id', ...updateValidation, userController.update);
+router.delete('/:id', ...deleteValidation, userController.delete);
 
 export default router;

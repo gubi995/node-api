@@ -4,7 +4,7 @@ import { UserModel } from './model';
 import { User } from './type';
 
 class UserService {
-  #throwIfUserNotFound(userExists: boolean, userId: string) {
+  #checkIfUserNotFound(userExists: boolean, userId: string) {
     if (!userExists) {
       throw new AppError(
         `User does not exists with id: ${userId}`,
@@ -20,7 +20,7 @@ class UserService {
   async getById(id: User['id']) {
     const user = await UserModel.findByPk(id);
 
-    this.#throwIfUserNotFound(Boolean(user), id);
+    this.#checkIfUserNotFound(Boolean(user), id);
 
     return user;
   }
@@ -51,7 +51,7 @@ class UserService {
       returning: true,
     });
 
-    this.#throwIfUserNotFound(Boolean(updateUser), id);
+    this.#checkIfUserNotFound(Boolean(updateUser), id);
 
     return updateUser;
   }
@@ -62,7 +62,7 @@ class UserService {
       { where: { id } }
     );
 
-    this.#throwIfUserNotFound(Boolean(success), id);
+    this.#checkIfUserNotFound(Boolean(success), id);
   }
 }
 

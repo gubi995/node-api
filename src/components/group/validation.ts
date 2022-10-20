@@ -14,8 +14,14 @@ const groupSchema = Joi.object({
   ),
 });
 
+const idValidation = Joi.string().uuid().required();
+
 const groupIdSchema = Joi.object({
-  id: Joi.string().required(),
+  id: idValidation,
+});
+
+const addUsersToGroupSchema = Joi.object({
+  userIds: Joi.array().items(idValidation),
 });
 
 export const updateValidation = [
@@ -28,3 +34,8 @@ export const createValidation = [validator.body(groupSchema)];
 export const deleteValidation = [validator.params(groupIdSchema)];
 
 export const getByIdValidation = [validator.params(groupIdSchema)];
+
+export const addUsersToGroupValidation = [
+  validator.params(groupIdSchema),
+  validator.body(addUsersToGroupSchema),
+];

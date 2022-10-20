@@ -5,6 +5,7 @@ import { HttpStatus } from '../../types/http-status';
 
 import groupService from './service';
 import {
+  AddUsersToGroupSchema,
   CreateGroupSchema,
   DeleteGroupSchema,
   GetByIdRequestSchema,
@@ -73,6 +74,23 @@ class GroupController {
       await groupService.delete(req.params.id);
 
       return res.status(HttpStatus.NO_CONTENT).end();
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async addUsersToGroup(
+    req: ValidatedRequest<AddUsersToGroupSchema>,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const group = await groupService.addUsersToGroup(
+        req.params.id,
+        req.body.userIds
+      );
+
+      return res.status(HttpStatus.OK).json({ group });
     } catch (error) {
       next(error);
     }

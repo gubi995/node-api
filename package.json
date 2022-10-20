@@ -5,7 +5,7 @@
   "scripts": {
     "build": "tsc",
     "dev": "nodemon server.ts",
-    "start": "npm run build && pm2 start dist/server.js",
+    "start": "npm run build && NODE_ENV=production pm2 start dist/server.js",
     "seed-db": "ts-node ./src/scripts/db",
     "test:watch": "jest --watch",
     "test": "jest",

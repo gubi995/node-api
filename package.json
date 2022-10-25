@@ -4,7 +4,7 @@
   "description": "",
   "scripts": {
     "build": "tsc",
-    "dev": "nodemon server.ts",
+    "dev": "nodemon server.ts | pino-pretty",
     "start": "npm run build && NODE_ENV=production pm2 start dist/server.js",
     "seed-db": "ts-node ./src/scripts/db",
     "test:watch": "jest --watch",
@@ -33,6 +33,7 @@
     "husky": "^8.0.1",
     "lint-staged": "^13.0.3",
     "nodemon": "^2.0.20",
+    "pino-pretty": "^9.1.1",
     "pm2": "^5.2.0",
     "prettier": "2.7.1",
     "regenerator-runtime": "^0.13.9",
@@ -40,6 +41,7 @@
     "typescript": "^4.8.4"
   },
   "dependencies": {
+    "cls-rtracer": "^2.6.2",
     "convict": "^6.2.3",
     "express": "^4.18.1",
     "express-joi-validation": "^5.0.1",
@@ -47,6 +49,8 @@
     "log4js": "^6.7.0",
     "pg": "^8.8.0",
     "pg-hstore": "^2.3.4",
+    "pino": "^8.7.0",
+    "pino-http": "^8.2.1",
     "reflect-metadata": "^0.1.13",
     "sequelize": "^6.25.2",
     "sequelize-typescript": "^2.1.5"

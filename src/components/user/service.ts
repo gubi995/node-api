@@ -6,10 +6,10 @@ import { User } from './type';
 class UserService {
   #checkIfUserNotFound(userExists: boolean, userId: string) {
     if (!userExists) {
-      throw new AppError(
-        `User does not exists with id: ${userId}`,
-        HttpStatus.NOT_FOUND
-      );
+      throw new AppError({
+        description: `User does not exists with id: ${userId}`,
+        statusCode: HttpStatus.NOT_FOUND,
+      });
     }
   }
 

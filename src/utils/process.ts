@@ -31,7 +31,7 @@ export const initProcessHandlers = (server: Server) => {
     errorHandler.handleError(appError);
 
     if (!errorHandler.isTrustedError(appError)) {
-      logger.error(appError);
+      logger.error(appError.message, appError);
 
       shutdownGracefullyWithExitCode(server, 1);
     }

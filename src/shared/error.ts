@@ -6,15 +6,29 @@ import { HttpStatus } from '../types/http-status';
 
 import logger from './logger';
 
+type AppErrorOptions = {
+  description: string;
+  statusCode: number;
+  metadata?: object;
+  isOperational?: boolean;
+};
+
 export class AppError extends Error {
   public readonly isOperational: boolean;
   public readonly statusCode: number;
+  public readonly metadata?: object;
 
-  constructor(description: string, statusCode: number, isOperational = true) {
+  constructor({
+    description,
+    statusCode,
+    isOperational = true,
+    metadata,
+  }: AppErrorOptions) {
     super(description);
     Object.setPrototypeOf(this, new.target.prototype);
     this.statusCode = statusCode;
     this.isOperational = isOperational;
+    this.metadata = metadata;
     Error.captureStackTrace(this);
   }
 }
@@ -42,21 +56,27 @@ export class ErrorHandler {
       const [detail] = error.error.details;
       console.log({ detail });
 
-      return new AppError(detail.message, HttpStatus.BAD_REQUEST);
+      return new AppError({
+        description: detail.message,
+        statusCode: HttpStatus.BAD_REQUEST,
+      });
     }
 
     if (error instanceof AppError) {
       return error;
     }
 
-    return new AppError(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    return new AppError({
+      description: error.message,
+      statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+    });
   }
 
   handleError(error: AppError) {
     if (error.isOperational) {
-      logger.warn(error.message);
+      logger.warn(error.message, error);
     } else {
-      logger.error(error);
+      logger.error(error.message, error);
     }
 
     // sendEmail if it is critical

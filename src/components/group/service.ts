@@ -11,10 +11,10 @@ import { Group } from './type';
 class GroupService {
   #checkIfGroupNotFound(groupExists: boolean, groupId: string) {
     if (!groupExists) {
-      throw new AppError(
-        `Group does not exists with id: ${groupId}`,
-        HttpStatus.NOT_FOUND
-      );
+      throw new AppError({
+        description: `Group does not exists with id: ${groupId}`,
+        statusCode: HttpStatus.NOT_FOUND,
+      });
     }
   }
 
@@ -62,10 +62,10 @@ class GroupService {
       (id) => !foundUserIds.includes(id)
     );
 
-    throw new AppError(
-      `User(s) not found with the following id(s): ${notExistingUserIds}`,
-      HttpStatus.NOT_FOUND
-    );
+    throw new AppError({
+      description: `User(s) not found with the following id(s): ${notExistingUserIds}`,
+      statusCode: HttpStatus.NOT_FOUND,
+    });
   }
 
   #checkIfOneOfTheUsersIsAlreadyPartOfTheGroup(
@@ -79,10 +79,10 @@ class GroupService {
     );
 
     if (usersIdsAlreadyInTheGroup.length) {
-      throw new AppError(
-        `User(s) with the following id(s) is/are already part of the group: ${usersIdsAlreadyInTheGroup}`,
-        HttpStatus.BAD_REQUEST
-      );
+      throw new AppError({
+        description: `User(s) with the following id(s) is/are already part of the group: ${usersIdsAlreadyInTheGroup}`,
+        statusCode: HttpStatus.BAD_REQUEST,
+      });
     }
   }
 

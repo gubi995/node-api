@@ -1,49 +1,56 @@
-import log4js from 'log4js';
-import path from 'path';
+import fs from 'fs';
+import rTracer from 'cls-rtracer';
+import pino, { multistream } from 'pino';
+import pinoHttp from 'pino-http';
 
-log4js.configure({
-  appenders: {
-    out: { type: 'stdout' },
-    app: { type: 'file', filename: path.join('logs', 'app.log') },
-    error: {
-      type: 'file',
-      filename: path.join('logs', 'error.log'),
-    },
-    onlyError: {
-      type: 'logLevelFilter',
-      appender: 'error',
-      level: 'error',
+const streams = multistream([
+  {
+    stream: process.stdout,
+  },
+  {
+    stream: process.stdout,
+    level: 'error',
+  },
+  {
+    stream: fs.createWriteStream('logs/app.log'),
+  },
+  {
+    stream: fs.createWriteStream('logs/app.log'),
+    level: 'error',
+  },
+]);
+
+const pinoLogger = pino(
+  {
+    level: 'debug',
+    mixin() {
+      return { requestId: rTracer.id() };
     },
   },
-  categories: {
-    default: {
-      appenders: ['out', 'app', 'onlyError'],
-      level: 'debug',
-      enableCallStack: true,
-    },
-  },
-  //   pm2: true, Loggers probably won't work according the doc. Let's look into it later
-});
-
-type Log = string | Error;
+  streams
+);
 
 class Logger {
-  #logger = log4js.getLogger();
+  #logger = pinoLogger;
 
-  debug(message: Log, ...details: Log[]) {
-    this.#logger.debug(message, ...details);
+  withMetadata(metadata: object) {
+    return this.#logger.child(metadata);
   }
 
-  info(message: Log, ...details: Log[]) {
-    this.#logger.info(message, ...details);
+  debug(message: string, context: object = {}) {
+    this.#logger.debug(context, message);
   }
 
-  warn(message: Log, ...details: Log[]) {
-    this.#logger.warn(message, ...details);
+  info(message: string, context: object = {}) {
+    this.#logger.info(context, message);
   }
 
-  error(message: Log, ...details: Log[]) {
-    this.#logger.error(message, ...details);
+  warn(message: string, context: object = {}) {
+    this.#logger.warn(context, message);
+  }
+
+  error(message: string, context: object = {}) {
+    this.#logger.error(context, message);
   }
 }
 
@@ -51,6 +58,11 @@ const logger = new Logger();
 
 export default logger;
 
-export const loggerMiddleware = log4js.connectLogger(log4js.getLogger(), {
-  level: 'info',
-});
+export const loggerMiddlewares = [
+  rTracer.expressMiddleware({
+    echoHeader: true,
+    useHeader: true,
+    headerName: 'X-Transaction-Id',
+  }),
+  pinoHttp({ logger: pinoLogger }),
+];

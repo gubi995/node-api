@@ -3,3 +3,4 @@ dist
 logs
 config
 .eslintcache
+generated-users.txt

@@ -30,6 +30,10 @@ export class UserModel extends Model {
   password!: User['password'];
 
   @AllowNull(false)
+  @Column(DataType.STRING)
+  salt!: User['salt'];
+
+  @AllowNull(false)
   @Validate({ min: 4, max: 130 })
   @Column(DataType.INTEGER)
   age!: User['age'];

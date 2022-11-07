@@ -23,11 +23,11 @@ class UserController {
     }
   }
 
-  getById = async (
+  async getById(
     req: ValidatedRequest<GetByIdRequestSchema>,
     res: Response,
     next: NextFunction
-  ) => {
+  ) {
     try {
       const user = await userService.getById(req.params.id);
 
@@ -35,7 +35,7 @@ class UserController {
     } catch (error) {
       next(error);
     }
-  };
+  }
 
   async getAutoSuggestions(
     req: ValidatedRequest<GetAutoSuggestUserSchema>,

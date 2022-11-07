@@ -1,23 +1,37 @@
 /* eslint-disable no-process-exit */
 // eslint-disable-next-line node/no-unpublished-import
 import { faker } from '@faker-js/faker';
+import fs from 'fs';
 
 import logger from '../shared/logger';
 import db from '../shared/db';
-import user, { User } from '../components/user';
+import { User } from '../components/user';
 import { UserModel } from '../components/user/model';
 import { GroupModel } from '../components/group/model';
 import { UserGroupModel } from '../components/user-group/model';
+import { generateSalt, hashPassword } from '../utils/auth';
 
 faker.seed(51536);
 
-const createUser = (): User => ({
-  id: faker.datatype.uuid(),
-  age: faker.datatype.number({ min: 4, max: 130 }),
-  isDeleted: false,
-  login: faker.internet.userName(),
-  password: faker.internet.password(),
-});
+const file = fs.createWriteStream('./generated-users.txt');
+
+const createUser = (): User => {
+  const salt = generateSalt();
+  const password = faker.internet.password();
+  const hashedPassword = hashPassword(password, salt).toString('hex');
+  const login = faker.internet.userName();
+
+  file.write(`username=${login};password=${password}\n`);
+
+  return {
+    login,
+    salt,
+    id: faker.datatype.uuid(),
+    age: faker.datatype.number({ min: 4, max: 130 }),
+    isDeleted: false,
+    password: hashedPassword,
+  };
+};
 
 const run = async () => {
   try {

@@ -7,10 +7,7 @@ export type Login = {
   password: User['password'];
 };
 
-export type Registration = Omit<
-  User,
-  'salt' | 'id' | 'createdAt' | 'updatedAt'
->;
+export type Registration = Omit<User, 'id' | 'createdAt' | 'updatedAt'>;
 
 export interface LoginSchema extends ValidatedRequestSchema {
   [ContainerTypes.Body]: Login;

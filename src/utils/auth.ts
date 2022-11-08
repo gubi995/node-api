@@ -1,9 +1,7 @@
-import crypto from 'crypto';
+import bcrypt from 'bcrypt';
 
-export const hashPassword = (password: string, salt: string) => {
-  return crypto.pbkdf2Sync(password, salt, 100000, 64, 'sha512');
-};
+export const hashPassword = (password: string) => {
+  const rounds = 12;
 
-export const generateSalt = () => {
-  return crypto.randomBytes(64).toString('base64');
+  return bcrypt.hash(password, rounds);
 };

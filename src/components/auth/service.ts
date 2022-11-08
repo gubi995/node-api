@@ -1,8 +1,8 @@
-import crypto from 'crypto';
+import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
 import config from '../../shared/config';
-import { generateSalt, hashPassword } from '../../utils/auth';
+import { hashPassword } from '../../utils/auth';
 import { HttpStatus } from '../../types/http-status';
 import { AppError } from '../../shared/error';
 import { UserModel } from '../user/model';
@@ -32,12 +32,7 @@ class AuthService {
       });
     }
 
-    const hashedPassword = hashPassword(password, user.salt);
-
-    const isValidPassword = crypto.timingSafeEqual(
-      Buffer.from(user.password),
-      Buffer.from(hashedPassword.toString('hex'))
-    );
+    const isValidPassword = await bcrypt.compare(password, user.password);
 
     if (!isValidPassword) {
       throw new AppError({
@@ -50,13 +45,11 @@ class AuthService {
   }
 
   async register(user: Registration) {
-    const salt = generateSalt();
-    const hashedPassword = hashPassword(user.password, salt);
+    const hashedPassword = await hashPassword(user.password);
 
     const newUser = await userService.create({
       ...user,
-      password: hashedPassword.toString('hex'),
-      salt,
+      password: hashedPassword,
     });
 
     return this.#generateToken(newUser);

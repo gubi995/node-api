@@ -4,7 +4,6 @@ export type User = {
   id: string;
   login: string;
   password: string;
-  salt: string;
   age: number;
   isDeleted: boolean;
   createdAt?: string;

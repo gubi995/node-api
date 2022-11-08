@@ -9,23 +9,21 @@ import { User } from '../components/user';
 import { UserModel } from '../components/user/model';
 import { GroupModel } from '../components/group/model';
 import { UserGroupModel } from '../components/user-group/model';
-import { generateSalt, hashPassword } from '../utils/auth';
+import { hashPassword } from '../utils/auth';
 
 faker.seed(51536);
 
 const file = fs.createWriteStream('./generated-users.txt');
 
-const createUser = (): User => {
-  const salt = generateSalt();
+const createUser = async (): Promise<User> => {
   const password = faker.internet.password();
-  const hashedPassword = hashPassword(password, salt).toString('hex');
+  const hashedPassword = await hashPassword(password);
   const login = faker.internet.userName();
 
   file.write(`username=${login};password=${password}\n`);
 
   return {
     login,
-    salt,
     id: faker.datatype.uuid(),
     age: faker.datatype.number({ min: 4, max: 130 }),
     isDeleted: false,
@@ -53,9 +51,10 @@ const run = async () => {
       name: 'Admin',
       permissions: ['READ', 'WRITE', 'DELETE'],
     });
-    const users = await UserModel.bulkCreate(
+    const generatedUsers = await Promise.all(
       Array(10).fill('').map(createUser)
     );
+    const users = await UserModel.bulkCreate(generatedUsers);
 
     await Promise.all([
       readonlyGroup.$add('User', users[0]),

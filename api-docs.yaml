@@ -1,0 +1,625 @@
+openapi: 3.0.0
+info:
+  title: Node mentoring
+  description: |-
+    This is a project for managing users and groups.
+
+    _It meant to be a sandbox project where I try out things based on best practices. For that I use: [this lovely collection](https://github.com/goldbergyoni/nodebestpractices)._
+
+    _Writing Swagger doc is one of those "things"._
+  version: 0.0.1
+
+servers:
+  - url: http://localhost:8080
+    description: local development
+  - url: https://nodementoring.com
+    description: prod environment
+
+tags:
+  - name: auth
+    description: Authentication
+  - name: user
+    description: User operations
+  - name: group
+    description: Group operations
+
+paths:
+  /auth/login:
+    post:
+      tags:
+        - auth
+      summary: User login
+      description: User login by username and password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  example: johndoe97
+                password:
+                  type: string
+                  example: thisISg00d
+                  pattern: ^(?=.*[0-9])(?=.*[a-zA-Z])([a-zA-Z0-9]+)$
+              required:
+                - username
+                - password
+      responses:
+        200:
+          description: 'Successful operation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Token'
+        401:
+          $ref: '#/components/responses/WrongCredentialsError'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+  /auth/register:
+    post:
+      tags:
+        - auth
+      summary: User registration
+      description: User registration by username and password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  example: johndoe97
+                password:
+                  type: string
+                  example: thisISg00d
+                  pattern: ^(?=.*[0-9])(?=.*[a-zA-Z])([a-zA-Z0-9]+)$
+                age:
+                  type: number
+                  example: 33
+                  minimum: 4
+                  maximum: 130
+              required:
+                - username
+                - password
+      responses:
+        200:
+          description: 'Successful operation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Token'
+        401:
+          $ref: '#/components/responses/WrongCredentialsError'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+  /user:
+    get:
+      tags:
+        - user
+      summary: Get all user
+      description: Get all user with user details
+      responses:
+        200:
+          description: 'Successful operation'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  users:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+        401:
+          $ref: '#/components/responses/AuthError'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      tags:
+        - user
+      summary: Create a new user
+      description: Create a new user
+      requestBody:
+        description: User data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewUser'
+      responses:
+        200:
+          description: 'Successful operation'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+        400:
+          $ref: '#/components/responses/ValidationError'
+        401:
+          $ref: '#/components/responses/AuthError'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+  /user/{id}:
+    get:
+      tags:
+        - user
+      summary: Get a single user
+      description: Get a single user by id
+      parameters:
+        - name: id
+          description: 'The id of the User we want to get'
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: 'Successful operation'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+        401:
+          $ref: '#/components/responses/AuthError'
+        404:
+          $ref: '#/components/responses/UserNotFoundError'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      tags:
+        - user
+      summary: Update a single user
+      description: Update a single user by id
+      parameters:
+        - name: id
+          description: 'The id of the User we want to update'
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: User data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUser'
+      responses:
+        200:
+          description: 'Successful operation'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+        400:
+          $ref: '#/components/responses/ValidationError'
+        401:
+          $ref: '#/components/responses/AuthError'
+        404:
+          $ref: '#/components/responses/UserNotFoundError'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      tags:
+        - user
+      summary: Delete a single user
+      description: Delete a single user by id
+      parameters:
+        - name: id
+          description: 'The id of the User we want to delete'
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        204:
+          description: 'Successful operation'
+        401:
+          $ref: '#/components/responses/AuthError'
+        404:
+          $ref: '#/components/responses/UserNotFoundError'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+  /user/auto-suggestion:
+    get:
+      tags:
+        - user
+      summary: Get auto suggestions
+      description: Get auto suggestion based on the given query parameters
+      parameters:
+        - name: limit
+          description: 'The number of desired suggestions'
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: login
+          description: 'Search text for username'
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: 'Successful operation'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  users:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+        401:
+          $ref: '#/components/responses/AuthError'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+  /group:
+    get:
+      tags:
+        - group
+      summary: Get all group
+      description: Get all group with group details
+      responses:
+        200:
+          description: 'Successful operation'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  groups:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Group'
+        401:
+          $ref: '#/components/responses/AuthError'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      tags:
+        - group
+      summary: Create a new group
+      description: Create a new group
+      requestBody:
+        description: Group data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewGroup'
+      responses:
+        200:
+          description: 'Successful operation'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  group:
+                    $ref: '#/components/schemas/Group'
+        400:
+          $ref: '#/components/responses/ValidationError'
+        401:
+          $ref: '#/components/responses/AuthError'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+  /group/{id}:
+    get:
+      tags:
+        - group
+      summary: Get a single group
+      description: Get a single group by id
+      parameters:
+        - name: id
+          description: 'The id of the Group we want to get'
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: 'Successful operation'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  group:
+                    $ref: '#/components/schemas/Group'
+        401:
+          $ref: '#/components/responses/AuthError'
+        404:
+          $ref: '#/components/responses/GroupNotFoundError'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      tags:
+        - group
+      summary: Update a single group
+      description: Update a single group by id
+      parameters:
+        - name: id
+          description: 'The id of the Group we want to update'
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Group data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewGroup'
+      responses:
+        200:
+          description: 'Successful operation'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  group:
+                    $ref: '#/components/schemas/Group'
+        400:
+          $ref: '#/components/responses/ValidationError'
+        401:
+          $ref: '#/components/responses/AuthError'
+        404:
+          $ref: '#/components/responses/GroupNotFoundError'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      tags:
+        - group
+      summary: Delete a single group
+      description: Delete a single group by id
+      parameters:
+        - name: id
+          description: 'The id of the Group we want to delete'
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        204:
+          description: 'Successful operation'
+        401:
+          $ref: '#/components/responses/AuthError'
+        404:
+          $ref: '#/components/responses/GroupNotFoundError'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+  /group/{id}/add-user:
+    put:
+      tags:
+        - group
+      summary: Add users to a particular group
+      description: Add users by ids to a particular group
+      parameters:
+        - name: id
+          description: 'The id of the Group we want to add users to'
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: 'User ids to be added to the Group'
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userIds:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+      responses:
+        200:
+          description: 'Successful operation'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  group:
+                    allOf:
+                      - $ref: '#/components/schemas/Group'
+                      - type: object
+                        properties:
+                          users:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/User'
+        400:
+          description: 'Bad request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: 'User(s) with the following id(s) is/are already part of the group: d01d7c42-eede-4234-94bb-0f0639153535,2a878b18-f460-4b33-97b8-9666751c529c'
+                status: 400
+        401:
+          $ref: '#/components/responses/AuthError'
+        404:
+          description: 'Not found'
+          content:
+            applicaiton/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                groupNotFound:
+                  value:
+                    error: 'Group does not exists with id: c5937e6a-1bfc-46f9-823b-26353637def4'
+                    status: 404
+                usersNotFound:
+                  value:
+                    error: 'User(s) not found with the following id(s): 25678ef4-f5f2-49af-b416-8fac2b5244d6'
+                    status: 404
+        500:
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  schemas:
+    NewUser:
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+        age:
+          type: number
+      required:
+        - username
+        - password
+        - age
+    UpdateUser:
+      allOf:
+        - $ref: '#/components/schemas/NewUser'
+        - type: object
+          properties:
+            isDeleted:
+              type: boolean
+    User:
+      allOf:
+        - $ref: '#/components/schemas/UpdateUser'
+        - type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            createdAt:
+              type: string
+            updatedAt:
+              type: string
+          required:
+            - id
+    Permission:
+      type: string
+      enum:
+        - READ
+        - WRITE
+        - DELETE
+        - SHARE
+        - UPLOAD_FILE
+    NewGroup:
+      properties:
+        name:
+          type: string
+        permissions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Permission'
+      required:
+        - name
+        - permissions
+    Group:
+      allOf:
+        - $ref: '#/components/schemas/NewGroup'
+        - type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            createdAt:
+              type: string
+            updatedAt:
+              type: string
+          required:
+            - id
+    Token:
+      properties:
+        token:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiaWF0IjoxNjY3ODk1Nzg5LCJleHAiOjE2Njc4OTkzODksInN1YiI6ImZmMzBjNDFlLTA5YWItNGIyYy1hN2FlLTk1MDk5ZjZhMDQ2MSJ9.Q5fSSEwsfDtguj4QZsL8PWnoMdYFmDOqfsi-peNZb3I
+          format: jwt
+      required:
+        - token
+    Error:
+      properties:
+        error:
+          type: string
+          example: 'Error message'
+        status:
+          type: number
+          example: 500
+        stack:
+          type: string
+      required:
+        - error
+        - status
+  responses:
+    WrongCredentialsError:
+      description: 'Incorrenction username or password'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: 'Incorrenction username or password'
+            status: 401
+    AuthError:
+      description: 'Authentication error'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            invalidToken:
+              value:
+                error: 'invalid token'
+                status: 401
+            noAuthToken:
+              value:
+                error: 'No auth token'
+                status: 401
+    UserNotFoundError:
+      description: 'User not found'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: 'User does not exists with id: c5937e6a-1bfc-46f9-823b-26353637def4'
+            status: 404
+    GroupNotFoundError:
+      description: 'Group not found'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: 'Group does not exists with id: c5937e6a-1bfc-46f9-823b-26353637def4'
+            status: 404
+    ValidationError:
+      description: 'Payload validation error'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: 'xyz field is invalid'
+            status: 400
+    InternalServerError:
+      description: 'Internal server error'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: 'Internal server error'
+            status: 500

@@ -4,7 +4,7 @@
   "description": "",
   "scripts": {
     "build": "tsc",
-    "dev": "nodemon server.ts | pino-pretty",
+    "dev": "nodemon server.ts -e ts,yaml | pino-pretty",
     "start": "npm run build && NODE_ENV=production pm2 start dist/server.js",
     "seed-db": "ts-node ./src/scripts/db",
     "test:watch": "jest --watch",
@@ -27,7 +27,9 @@
     "@types/node": "^18.11.0",
     "@types/passport": "^1.0.11",
     "@types/passport-jwt": "^3.0.7",
+    "@types/swagger-ui-express": "^4.1.3",
     "@types/validator": "^13.7.8",
+    "@types/yamljs": "^0.2.31",
     "@typescript-eslint/eslint-plugin": "^5.38.1",
     "@typescript-eslint/parser": "^5.38.1",
     "eslint": "^8.25.0",
@@ -63,7 +65,9 @@
     "pino-http": "^8.2.1",
     "reflect-metadata": "^0.1.13",
     "sequelize": "^6.25.2",
-    "sequelize-typescript": "^2.1.5"
+    "sequelize-typescript": "^2.1.5",
+    "swagger-ui-express": "^4.6.0",
+    "yamljs": "^0.3.0"
   },
   "engines": {
     "node": ">=8.10.0"

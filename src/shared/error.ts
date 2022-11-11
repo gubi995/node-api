@@ -35,7 +35,7 @@ export class AppError extends Error {
 
 export const errorMiddleware: ErrorRequestHandler = (
   error: any,
-  req: Request,
+  _req: Request,
   res: Response,
   _next: NextFunction
 ) => {
@@ -54,7 +54,6 @@ export class ErrorHandler {
   parse(error: any) {
     if (error?.error instanceof ValidationError) {
       const [detail] = error.error.details;
-      console.log({ detail });
 
       return new AppError({
         description: detail.message,
@@ -67,7 +66,7 @@ export class ErrorHandler {
     }
 
     return new AppError({
-      description: error.message,
+      description: error.message ?? 'Internal server error',
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
     });
   }

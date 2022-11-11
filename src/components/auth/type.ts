@@ -2,10 +2,7 @@ import { ContainerTypes, ValidatedRequestSchema } from 'express-joi-validation';
 
 import { User } from '../user';
 
-export type Login = {
-  username: User['login'];
-  password: User['password'];
-};
+export type Login = Pick<User, 'username' | 'password'>;
 
 export type Registration = Omit<User, 'id' | 'createdAt' | 'updatedAt'>;
 

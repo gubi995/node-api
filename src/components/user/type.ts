@@ -2,7 +2,7 @@ import { ContainerTypes, ValidatedRequestSchema } from 'express-joi-validation';
 
 export type User = {
   id: string;
-  login: string;
+  username: string;
   password: string;
   age: number;
   isDeleted: boolean;

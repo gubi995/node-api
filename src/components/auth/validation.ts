@@ -3,12 +3,12 @@ import * as Joi from 'joi';
 import { validator } from '../../shared/validator';
 import {
   userSchema,
-  loginValidation,
+  usernameValidation,
   passwordValidation,
 } from '../user/validation';
 
 const loginSchema = Joi.object({
-  username: loginValidation,
+  username: usernameValidation,
   password: passwordValidation,
 });
 

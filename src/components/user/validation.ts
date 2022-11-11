@@ -6,7 +6,7 @@ export const passwordValidation = Joi.string()
   .required()
   .regex(/^(?=.*[0-9])(?=.*[a-zA-Z])([a-zA-Z0-9]+)$/);
 
-export const loginValidation = Joi.string().required();
+export const usernameValidation = Joi.string().required();
 
 const ageValidation = Joi.number().required().min(4).max(130);
 
@@ -15,12 +15,12 @@ const isDeletedValidation = Joi.boolean();
 const idValidation = Joi.string().uuid().required();
 
 const userAutoSuggestionSchema = Joi.object({
-  login: loginValidation,
+  username: usernameValidation,
   limit: Joi.number().required(),
 });
 
 export const userSchema = Joi.object({
-  login: loginValidation,
+  username: usernameValidation,
   password: passwordValidation,
   age: ageValidation,
   isDeleted: isDeletedValidation,

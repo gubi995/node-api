@@ -12,7 +12,7 @@ import { Login, Registration } from './type';
 
 class AuthService {
   #generateToken(user: User) {
-    return jwt.sign({ username: user.login }, config.get('auth.jwtSecret'), {
+    return jwt.sign({ username: user.username }, config.get('auth.jwtSecret'), {
       expiresIn: '1h',
       subject: user.id,
     });
@@ -21,7 +21,7 @@ class AuthService {
   async login({ username, password }: Login) {
     const user = await UserModel.findOne({
       where: {
-        login: username,
+        username,
       },
     });
 

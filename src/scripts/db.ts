@@ -18,12 +18,12 @@ const file = fs.createWriteStream('./generated-users.txt');
 const createUser = async (): Promise<User> => {
   const password = faker.internet.password();
   const hashedPassword = await hashPassword(password);
-  const login = faker.internet.userName();
+  const username = faker.internet.userName();
 
-  file.write(`username=${login};password=${password}\n`);
+  file.write(`username=${username};password=${password}\n`);
 
   return {
-    login,
+    username,
     id: faker.datatype.uuid(),
     age: faker.datatype.number({ min: 4, max: 130 }),
     isDeleted: false,

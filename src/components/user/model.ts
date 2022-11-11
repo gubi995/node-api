@@ -23,7 +23,7 @@ export class UserModel extends Model {
 
   @AllowNull(false)
   @Column(DataType.STRING)
-  login!: User['login'];
+  username!: User['username'];
 
   @AllowNull(false)
   @Column(DataType.STRING)

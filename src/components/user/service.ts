@@ -28,14 +28,14 @@ class UserService {
   async getAutoSuggestions(loginSubstring: string, limit: number) {
     const users = await UserModel.findAll();
 
-    const suggestedUsers = users.filter(({ login }) =>
-      login.includes(loginSubstring)
+    const suggestedUsers = users.filter(({ username }) =>
+      username.includes(loginSubstring)
     );
 
     const limitedSuggestion = suggestedUsers.slice(0, limit);
 
     limitedSuggestion.sort((userA, userB) =>
-      userA.login.localeCompare(userB.login)
+      userA.username.localeCompare(userB.username)
     );
 
     return limitedSuggestion;

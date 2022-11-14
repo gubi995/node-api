@@ -4,10 +4,15 @@ import { UserModel } from './model';
 import { User } from './type';
 
 class UserService {
-  #checkIfUserNotFound(userExists: boolean, userId: string) {
+  #checkIfUserNotFound(userExists: boolean, userFields: Partial<User>) {
     if (!userExists) {
       throw new AppError({
-        description: `User does not exists with id: ${userId}`,
+        description: `User does not exists by: ${Object.entries(
+          userFields
+        ).reduce(
+          (keyValues, [key, value]) => `${keyValues};${key}=${value}`,
+          ''
+        )}`,
         statusCode: HttpStatus.NOT_FOUND,
       });
     }
@@ -17,21 +22,32 @@ class UserService {
     return await UserModel.findAll();
   }
 
-  async getById(id: User['id']) {
-    const user = await UserModel.findByPk(id);
+  async getByField(userFields: Partial<User>) {
+    const user = await UserModel.findOne({
+      where: {
+        ...userFields,
+      },
+    });
 
-    this.#checkIfUserNotFound(Boolean(user), id);
+    this.#checkIfUserNotFound(Boolean(user), userFields);
 
-    return user;
+    return user as UserModel;
   }
 
-  async getAutoSuggestions(loginSubstring: string, limit: number) {
+  async getUsersWithSimilarUsername(usernameSubstring: string) {
     const users = await UserModel.findAll();
 
     const suggestedUsers = users.filter(({ username }) =>
-      username.includes(loginSubstring)
+      username.includes(usernameSubstring)
     );
 
+    return suggestedUsers;
+  }
+
+  async sliceAndSortUsersByLimit(
+    suggestedUsers: Array<UserModel>,
+    limit: number
+  ) {
     const limitedSuggestion = suggestedUsers.slice(0, limit);
 
     limitedSuggestion.sort((userA, userB) =>
@@ -51,18 +67,18 @@ class UserService {
       returning: true,
     });
 
-    this.#checkIfUserNotFound(Boolean(updateUser), id);
+    this.#checkIfUserNotFound(Boolean(updateUser), { id });
 
     return updateUser;
   }
 
-  async delete(id: User['id']) {
+  async softDelete(id: User['id']) {
     const [success] = await UserModel.update(
       { isDeleted: true },
       { where: { id } }
     );
 
-    this.#checkIfUserNotFound(Boolean(success), id);
+    this.#checkIfUserNotFound(Boolean(success), { id });
   }
 }
 

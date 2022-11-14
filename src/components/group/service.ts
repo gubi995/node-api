@@ -1,15 +1,14 @@
-import { Op } from 'sequelize';
+import { Op, Transaction } from 'sequelize';
 
 import { HttpStatus } from '../../types/http-status';
 import { AppError } from '../../shared/error';
-import db from '../../shared/db';
 import { UserModel } from '../user/model';
 import { User } from '../user';
 import { GroupModel } from './model';
 import { Group } from './type';
 
 class GroupService {
-  #checkIfGroupNotFound(groupExists: boolean, groupId: string) {
+  checkIfGroupNotFound(groupExists: boolean, groupId: string) {
     if (!groupExists) {
       throw new AppError({
         description: `Group does not exists with id: ${groupId}`,
@@ -25,7 +24,7 @@ class GroupService {
   async getById(id: Group['id']) {
     const group = await GroupModel.findByPk(id);
 
-    this.#checkIfGroupNotFound(Boolean(group), id);
+    this.checkIfGroupNotFound(Boolean(group), id);
 
     return group;
   }
@@ -40,7 +39,7 @@ class GroupService {
       returning: true,
     });
 
-    this.#checkIfGroupNotFound(Boolean(updateGroup), id);
+    this.checkIfGroupNotFound(Boolean(updateGroup), id);
 
     return updateGroup;
   }
@@ -48,11 +47,11 @@ class GroupService {
   async delete(id: Group['id']) {
     const success = await GroupModel.destroy({ where: { id } });
 
-    this.#checkIfGroupNotFound(Boolean(success), id);
+    this.checkIfGroupNotFound(Boolean(success), id);
   }
 
-  #checkIfOneOfTheUsersNotFound(
-    users: UserModel[],
+  checkIfOneOfTheUsersNotFound(
+    users: Array<UserModel>,
     providedUserIds: Array<User['id']>
   ) {
     if (users.length === providedUserIds.length) return;
@@ -68,7 +67,7 @@ class GroupService {
     });
   }
 
-  #checkIfOneOfTheUsersIsAlreadyPartOfTheGroup(
+  checkIfOneOfTheUsersIsAlreadyPartOfTheGroup(
     group: GroupModel,
     providedUserIds: Array<User['id']>
   ) {
@@ -86,41 +85,42 @@ class GroupService {
     }
   }
 
-  async addUsersToGroup(id: Group['id'], userIds: Array<User['id']>) {
-    const result = await db.transaction(async (transaction) => {
-      const [group, users] = await Promise.all([
-        await GroupModel.findByPk(id, {
-          include: [UserModel],
-          transaction,
-        }),
-        await UserModel.findAll({
-          where: {
-            id: {
-              [Op.in]: userIds,
-            },
-          },
-          transaction,
-        }),
-      ]);
-
-      this.#checkIfGroupNotFound(Boolean(group), id);
-      this.#checkIfOneOfTheUsersIsAlreadyPartOfTheGroup(
-        group as GroupModel,
-        userIds
-      );
-      this.#checkIfOneOfTheUsersNotFound(users, userIds);
-
-      await group?.$add('User', users, { transaction });
-
-      const newGroup = await GroupModel.findByPk(id, {
+  async getGroupAndUsersToAdd(
+    groupId: Group['id'],
+    userIds: Array<User['id']>,
+    transaction: Transaction
+  ) {
+    const [group, users] = await Promise.all([
+      await GroupModel.findByPk(groupId, {
         include: [UserModel],
         transaction,
-      });
+      }),
+      await UserModel.findAll({
+        where: {
+          id: {
+            [Op.in]: userIds,
+          },
+        },
+        transaction,
+      }),
+    ]);
 
-      return newGroup as GroupModel;
+    return { group, users };
+  }
+
+  async addUsersToGroup(
+    group: GroupModel,
+    users: Array<UserModel>,
+    transaction: Transaction
+  ) {
+    await group?.$add('User', users, { transaction });
+
+    const newGroup = await GroupModel.findByPk(group.id, {
+      include: [UserModel],
+      transaction,
     });
 
-    return result;
+    return newGroup as GroupModel;
   }
 }
 

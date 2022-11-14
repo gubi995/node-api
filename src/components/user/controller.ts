@@ -43,9 +43,14 @@ class UserController {
     next: NextFunction
   ) {
     try {
-      const users = await userService.getAutoSuggestions(
-        req.query.login,
-        req.query.limit
+      const { login, limit } = req.query;
+
+      const suggestedUsers = await userService.getUsersWithSimilarUsername(
+        login
+      );
+      const users = await userService.sliceAndSortUsersByLimit(
+        suggestedUsers,
+        limit
       );
 
       return res.status(HttpStatus.OK).json({ users });
@@ -88,7 +93,7 @@ class UserController {
     next: NextFunction
   ) {
     try {
-      await userService.delete(req.params.id);
+      await userService.softDelete(req.params.id);
 
       return res.status(HttpStatus.NO_CONTENT).end();
     } catch (error) {

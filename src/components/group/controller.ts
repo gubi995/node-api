@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { ValidatedRequest } from 'express-joi-validation';
 
 import { HttpStatus } from '../../types/http-status';
+import db from '../../shared/db';
 
 import groupService from './service';
 import {
@@ -11,6 +12,7 @@ import {
   GetByIdRequestSchema,
   UpdateGroupSchema,
 } from './type';
+import { GroupModel } from './model';
 
 class GroupController {
   async getAll(_req: Request, res: Response, next: NextFunction) {
@@ -85,10 +87,31 @@ class GroupController {
     next: NextFunction
   ) {
     try {
-      const group = await groupService.addUsersToGroup(
-        req.params.id,
-        req.body.userIds
-      );
+      const group = await db.transaction(async (transaction) => {
+        const groupId = req.params.id;
+        const userIds = req.body.userIds;
+
+        const { group, users } = await groupService.getGroupAndUsersToAdd(
+          groupId,
+          userIds,
+          transaction
+        );
+
+        groupService.checkIfGroupNotFound(Boolean(group), groupId);
+        groupService.checkIfOneOfTheUsersIsAlreadyPartOfTheGroup(
+          group as GroupModel,
+          userIds
+        );
+        groupService.checkIfOneOfTheUsersNotFound(users, userIds);
+
+        const updatedGroup = groupService.addUsersToGroup(
+          group as GroupModel,
+          users,
+          transaction
+        );
+
+        return updatedGroup;
+      });
 
       return res.status(HttpStatus.OK).json({ group });
     } catch (error) {

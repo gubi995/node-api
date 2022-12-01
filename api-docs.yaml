@@ -594,7 +594,7 @@ components:
           schema:
             $ref: '#/components/schemas/Error'
           example:
-            error: 'User does not exists with id: c5937e6a-1bfc-46f9-823b-26353637def4'
+            error: 'User does not exists with the following fields: key=value;key=value'
             status: 404
     GroupNotFoundError:
       description: 'Group not found'

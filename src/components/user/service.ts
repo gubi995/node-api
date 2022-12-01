@@ -7,7 +7,7 @@ class UserService {
   #checkIfUserNotFound(userExists: boolean, userFields: Partial<User>) {
     if (!userExists) {
       throw new AppError({
-        description: `User does not exists by: ${Object.entries(
+        description: `User does not exists with the following fields: ${Object.entries(
           userFields
         ).reduce(
           (keyValues, [key, value]) => `${keyValues};${key}=${value}`,

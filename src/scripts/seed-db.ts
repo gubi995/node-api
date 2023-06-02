@@ -8,8 +8,7 @@ import db from '../shared/db';
 import { User } from '../components/user';
 import { UserModel } from '../components/user/model';
 import { GroupModel } from '../components/group/model';
-import { UserGroupModel } from '../components/user-group/model';
-import { hashPassword } from '../utils/auth';
+import authService from '../components/auth/service';
 
 faker.seed(51536);
 
@@ -17,7 +16,7 @@ const file = fs.createWriteStream('./generated-users.txt');
 
 const createUser = async (): Promise<User> => {
   const password = faker.internet.password();
-  const hashedPassword = await hashPassword(password);
+  const hashedPassword = await authService.hashPassword(password);
   const username = faker.internet.userName();
 
   file.write(`username=${username};password=${password}\n`);
@@ -33,12 +32,9 @@ const createUser = async (): Promise<User> => {
 
 const run = async () => {
   try {
-    await db.authenticate();
+    logger.info('DB script for seeding data just started...');
 
-    // Create the DB table.
-    await UserModel.sync({ force: true });
-    await GroupModel.sync({ force: true });
-    await UserGroupModel.sync({ force: true });
+    await db.authenticate();
 
     // Insert data.
     const readonlyGroup = await GroupModel.create({

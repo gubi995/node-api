@@ -1,0 +1,5 @@
+{
+  "watchPathIgnorePatterns": ["node_modules"],
+  "testRegex": "((\\.|/*.)(test))\\.ts?$",
+  "resetMocks": true
+}
